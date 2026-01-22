@@ -55,8 +55,14 @@ const ImageEditor = () => {
       if (response.data.success) {
         setUploadedFilename(response.data.filename);
         setFileName(response.data.original_name);
-        setOriginalImage(URL.createObjectURL(file));
-        setFilteredImage(URL.createObjectURL(file));
+        const imageUrl = URL.createObjectURL(file);
+        setOriginalImage(imageUrl);
+        setFilteredImage(imageUrl); // Set both images to the same initially
+
+        // Apply the original filter immediately to ensure both show the same image
+        setTimeout(() => {
+          applyFilter();
+        }, 100);
       }
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -71,16 +77,21 @@ const ImageEditor = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/apply-filter`, {
-        filename: uploadedFilename,
-        filter: selectedFilter,
-        params: currentParams,
-      });
-
-      if (response.data.success) {
-        setFilteredImage(response.data.image);
+      if (selectedFilter === 'original') {
+        // If original filter is selected, just show the original image
+        setFilteredImage(originalImage);
       } else {
-        console.error('Error applying filter:', response.data.error);
+        const response = await axios.post(`${API_URL}/apply-filter`, {
+          filename: uploadedFilename,
+          filter: selectedFilter,
+          params: currentParams,
+        });
+
+        if (response.data.success) {
+          setFilteredImage(response.data.image);
+        } else {
+          console.error('Error applying filter:', response.data.error);
+        }
       }
     } catch (error) {
       console.error('Error applying filter:', error);
@@ -136,7 +147,12 @@ const ImageEditor = () => {
 
     // Apply the filter immediately when selected
     if (uploadedFilename) {
-      applyFilter();
+      if (filter.id === 'original') {
+        // If original filter is selected, just show the original image
+        setFilteredImage(originalImage);
+      } else {
+        applyFilter();
+      }
     }
   };
 
@@ -148,7 +164,12 @@ const ImageEditor = () => {
 
     // Automatically apply the filter when parameters change
     if (uploadedFilename) {
-      applyFilter();
+      if (selectedFilter === 'original') {
+        // If original filter is selected, no need to apply anything
+        setFilteredImage(originalImage);
+      } else {
+        applyFilter();
+      }
     }
   };
 
@@ -307,201 +328,207 @@ const ImageEditor = () => {
 
       {/* Main Editor */}
       {originalImage && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Image Display */}
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
-            <div className="card glass-effect overflow-hidden">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <FaFolderOpen className="mr-2 text-accent-primary" /> Original Image
-                </h3>
-                <span className="text-sm text-gray-400">{fileName}</span>
-              </div>
-              <div className="aspect-square flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
-                <img 
-                  src={originalImage} 
-                  alt="Original" 
-                  className="max-w-full max-h-full object-contain"
-                />
-              </div>
-            </div>
-
-            <div className="card glass-effect overflow-hidden">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <FaMagic className="mr-2 text-accent-primary" /> Filtered Image
-                </h3>
-                <span className="text-sm text-gray-400 capitalize">{selectedFilter.replace(/_/g, ' ')}</span>
-              </div>
-              <div className="aspect-square flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
-                {filteredImage ? (
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Fixed Image Display Panel */}
+          <div className="lg:w-1/2 sticky top-4 self-start">
+            <div className="grid md:grid-cols-1 gap-8">
+              <div className="card glass-effect overflow-hidden">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <FaFolderOpen className="mr-2 text-accent-primary" /> Original Image
+                  </h3>
+                  <span className="text-sm text-gray-400">{fileName}</span>
+                </div>
+                <div className="aspect-square flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
                   <img 
-                    src={filteredImage} 
-                    alt="Filtered" 
+                    src={originalImage} 
+                    alt="Original" 
                     className="max-w-full max-h-full object-contain"
                   />
-                ) : (
-                  <div className="text-gray-500">Apply a filter to see the result</div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Filters Section */}
-          <div className="card glass-effect mb-8">
-            <h3 className="text-xl font-semibold mb-6 flex items-center">
-              <FaMagic className="mr-2 text-accent-primary" /> Select Filter
-            </h3>
-
-            {/* Category Filter */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedCategory === category
-                      ? 'bg-gradient-to-r from-accent-primary to-accent-secondary text-dark-bg'
-                      : 'bg-dark-card text-gray-300 hover:bg-accent-primary hover:text-dark-bg'
-                  }`}
-                >
-                  {category === 'all' ? 'All' :
-                   category === 'basic' ? 'Basic' :
-                   category === 'color' ? 'Color' :
-                   category === 'blackwhite' ? 'Black & White' :
-                   category === 'blur' ? 'Blur' :
-                   category === 'edge' ? 'Edge Detection' :
-                   category === 'artistic' ? 'Artistic' :
-                   category === 'vintage' ? 'Vintage' :
-                   category === 'special' ? 'Special' :
-                   category === 'enhancement' ? 'Enhancement' :
-                   category === 'distortion' ? 'Distortion' :
-                   category === 'light' ? 'Light' :
-                   category.charAt(0).toUpperCase() + category.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Filters Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-              {filteredFilters.map((filter) => (
-                <motion.div
-                  key={filter.id}
-                  className={`filter-card text-center p-4 cursor-pointer rounded-lg transition-all ${
-                    selectedFilter === filter.id
-                      ? 'bg-gradient-to-r from-accent-primary to-accent-secondary text-dark-bg'
-                      : 'bg-dark-card'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => selectFilter(filter)}
-                >
-                  <div className="text-lg mb-2">
-                    <i className={getFilterIcon(filter.category)}></i>
-                  </div>
-                  <div className="text-xs font-medium">{filter.name}</div>
-                  <div className="text-xs text-gray-500 mt-1">{filter.id}</div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Parameters */}
-            {filters.find(f => f.id === selectedFilter)?.params && 
-             filters.find(f => f.id === selectedFilter).params.length > 0 && (
-              <div className="bg-dark-card rounded-lg p-4 mb-6">
-                <h4 className="text-lg font-semibold mb-4 flex items-center">
-                  <FaSlidersH className="mr-2 text-accent-primary" /> Parameters
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filters.find(f => f.id === selectedFilter)?.params?.map((param) => (
-                    <div key={param.name} className="space-y-2">
-                      <label className="block text-sm font-medium">
-                        {param.name === 'factor' ? 'Factor' :
-                         param.name === 'kernel_size' ? 'Kernel Size' :
-                         param.name === 'shift' ? 'Shift' :
-                         param.name === 'strength' ? 'Strength' :
-                         param.name === 'size' ? 'Size' :
-                         param.name === 'threshold1' ? 'Threshold 1' :
-                         param.name === 'threshold2' ? 'Threshold 2' :
-                         param.name === 'radius' ? 'Radius' :
-                         param.name === 'angle' ? 'Angle' :
-                         param.name === 'focus_height' ? 'Focus Height' :
-                         param.name === 'threshold' ? 'Threshold' :
-                         param.name === 'dot_size' ? 'Dot Size' :
-                         param.name === 'brush_size' ? 'Brush Size' :
-                         param.name === 'levels' ? 'Levels' :
-                         param.name === 'block_size' ? 'Block Size' :
-                         param.name === 'segments' ? 'Segments' :
-                         param.name === 'clipLimit' ? 'Clip Limit' :
-                         param.name === 'tileGridSize' ? 'Tile Grid Size' :
-                         param.name === 'amount' ? 'Amount' :
-                         param.name === 'red' ? 'Red' :
-                         param.name === 'green' ? 'Green' :
-                         param.name === 'blue' ? 'Blue' :
-                         param.name === 'sigma_s' ? 'Sigma S' :
-                         param.name === 'sigma_r' ? 'Sigma R' :
-                         param.name === 'k' ? 'K Factor' :
-                         param.name === 'amplitude' ? 'Amplitude' :
-                         param.name === 'frequency' ? 'Frequency' :
-                         param.name === 'pixel_size' ? 'Pixel Size' :
-                         param.name === 'center_x' ? 'Center X' :
-                         param.name === 'center_y' ? 'Center Y' :
-                         param.name === 'num_rays' ? 'Number of Rays' :
-                         param.name} ({currentParams[param.name] || param.default || param.min})
-                      </label>
-                      <input
-                        type="range"
-                        min={param.min}
-                        max={param.max}
-                        step={param.step || 0.1}
-                        value={currentParams[param.name] || param.default || param.min}
-                        onChange={(e) => updateParam(param.name, e.target.value)}
-                        className="w-full accent-accent-primary"
-                      />
-                      <div className="text-xs text-gray-400">
-                        Range: {param.min} - {param.max}
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
-            )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={applyFilter}
-                disabled={isLoading}
-                className="btn-primary flex items-center"
-              >
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <FaMagic className="mr-2" />
-                )}
-                Apply Filter
-              </button>
-
-              <button
-                onClick={downloadImage}
-                className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-accent-primary text-accent-primary hover:bg-accent-primary hover:text-dark-bg flex items-center"
-              >
-                <FaDownload className="mr-2" /> Download
-              </button>
-
-              <button
-                onClick={resetImage}
-                className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-gray-500 text-gray-300 hover:bg-gray-500 hover:text-dark-bg flex items-center"
-              >
-                <FaRedo className="mr-2" /> Reset
-              </button>
+              <div className="card glass-effect overflow-hidden">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <FaMagic className="mr-2 text-accent-primary" /> Filtered Image
+                  </h3>
+                  <span className="text-sm text-gray-400 capitalize">{selectedFilter.replace(/_/g, ' ')}</span>
+                </div>
+                <div className="aspect-square flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
+                  {(filteredImage && selectedFilter !== 'original') ? (
+                    <img
+                      src={filteredImage}
+                      alt="Filtered"
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  ) : originalImage ? (
+                    <img
+                      src={originalImage}
+                      alt="Original (no filter applied)"
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  ) : (
+                    <div className="text-gray-500">Apply a filter to see the result</div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </motion.div>
+
+          {/* Scrollable Filters Section */}
+          <div className="lg:w-1/2">
+            <div className="card glass-effect mb-8">
+              <h3 className="text-xl font-semibold mb-6 flex items-center">
+                <FaMagic className="mr-2 text-accent-primary" /> Select Filter
+              </h3>
+
+              {/* Category Filter */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedCategory === category
+                        ? 'bg-gradient-to-r from-accent-primary to-accent-secondary text-dark-bg'
+                        : 'bg-dark-card text-gray-300 hover:bg-accent-primary hover:text-dark-bg'
+                    }`}
+                  >
+                    {category === 'all' ? 'All' :
+                     category === 'basic' ? 'Basic' :
+                     category === 'color' ? 'Color' :
+                     category === 'blackwhite' ? 'Black & White' :
+                     category === 'blur' ? 'Blur' :
+                     category === 'edge' ? 'Edge Detection' :
+                     category === 'artistic' ? 'Artistic' :
+                     category === 'vintage' ? 'Vintage' :
+                     category === 'special' ? 'Special' :
+                     category === 'enhancement' ? 'Enhancement' :
+                     category === 'distortion' ? 'Distortion' :
+                     category === 'light' ? 'Light' :
+                     category.charAt(0).toUpperCase() + category.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Filters Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+                {filteredFilters.map((filter) => (
+                  <motion.div
+                    key={filter.id}
+                    className={`filter-card text-center p-4 cursor-pointer rounded-lg transition-all ${
+                      selectedFilter === filter.id
+                        ? 'bg-gradient-to-r from-accent-primary to-accent-secondary text-dark-bg'
+                        : 'bg-dark-card'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => selectFilter(filter)}
+                  >
+                    <div className="text-lg mb-2">
+                      <i className={getFilterIcon(filter.category)}></i>
+                    </div>
+                    <div className="text-xs font-medium">{filter.name}</div>
+                    <div className="text-xs text-gray-500 mt-1">{filter.id}</div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Parameters */}
+              {filters.find(f => f.id === selectedFilter)?.params &&
+               filters.find(f => f.id === selectedFilter).params.length > 0 && (
+                <div className="bg-dark-card rounded-lg p-4 mb-6">
+                  <h4 className="text-lg font-semibold mb-4 flex items-center">
+                    <FaSlidersH className="mr-2 text-accent-primary" /> Parameters
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filters.find(f => f.id === selectedFilter)?.params?.map((param) => (
+                      <div key={param.name} className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {param.name === 'factor' ? 'Factor' :
+                           param.name === 'kernel_size' ? 'Kernel Size' :
+                           param.name === 'shift' ? 'Shift' :
+                           param.name === 'strength' ? 'Strength' :
+                           param.name === 'size' ? 'Size' :
+                           param.name === 'threshold1' ? 'Threshold 1' :
+                           param.name === 'threshold2' ? 'Threshold 2' :
+                           param.name === 'radius' ? 'Radius' :
+                           param.name === 'angle' ? 'Angle' :
+                           param.name === 'focus_height' ? 'Focus Height' :
+                           param.name === 'threshold' ? 'Threshold' :
+                           param.name === 'dot_size' ? 'Dot Size' :
+                           param.name === 'brush_size' ? 'Brush Size' :
+                           param.name === 'levels' ? 'Levels' :
+                           param.name === 'block_size' ? 'Block Size' :
+                           param.name === 'segments' ? 'Segments' :
+                           param.name === 'clipLimit' ? 'Clip Limit' :
+                           param.name === 'tileGridSize' ? 'Tile Grid Size' :
+                           param.name === 'amount' ? 'Amount' :
+                           param.name === 'red' ? 'Red' :
+                           param.name === 'green' ? 'Green' :
+                           param.name === 'blue' ? 'Blue' :
+                           param.name === 'sigma_s' ? 'Sigma S' :
+                           param.name === 'sigma_r' ? 'Sigma R' :
+                           param.name === 'k' ? 'K Factor' :
+                           param.name === 'amplitude' ? 'Amplitude' :
+                           param.name === 'frequency' ? 'Frequency' :
+                           param.name === 'pixel_size' ? 'Pixel Size' :
+                           param.name === 'center_x' ? 'Center X' :
+                           param.name === 'center_y' ? 'Center Y' :
+                           param.name === 'num_rays' ? 'Number of Rays' :
+                           param.name} ({currentParams[param.name] || param.default || param.min})
+                        </label>
+                        <input
+                          type="range"
+                          min={param.min}
+                          max={param.max}
+                          step={param.step || 0.1}
+                          value={currentParams[param.name] || param.default || param.min}
+                          onChange={(e) => updateParam(param.name, e.target.value)}
+                          className="w-full accent-accent-primary"
+                        />
+                        <div className="text-xs text-gray-400">
+                          Range: {param.min} - {param.max}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={applyFilter}
+                  disabled={isLoading}
+                  className="btn-primary flex items-center"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <FaMagic className="mr-2" />
+                  )}
+                  Apply Filter
+                </button>
+                
+                <button
+                  onClick={downloadImage}
+                  className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-accent-primary text-accent-primary hover:bg-accent-primary hover:text-dark-bg flex items-center"
+                >
+                  <FaDownload className="mr-2" /> Download
+                </button>
+                
+                <button
+                  onClick={resetImage}
+                  className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-gray-500 text-gray-300 hover:bg-gray-500 hover:text-dark-bg flex items-center"
+                >
+                  <FaRedo className="mr-2" /> Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Loading Overlay */}
