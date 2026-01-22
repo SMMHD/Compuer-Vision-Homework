@@ -58,7 +58,7 @@ const ImageEditor = () => {
         const imageUrl = URL.createObjectURL(file);
         setOriginalImage(imageUrl);
         setFilteredImage(imageUrl); // Set both images to the same initially
-
+        
         // Apply the original filter immediately to ensure both show the same image
         setTimeout(() => {
           applyFilter();
@@ -144,7 +144,7 @@ const ImageEditor = () => {
       });
       setCurrentParams(newParams);
     }
-
+    
     // Apply the filter immediately when selected
     if (uploadedFilename) {
       if (filter.id === 'original') {
@@ -161,7 +161,7 @@ const ImageEditor = () => {
       ...prev,
       [name]: parseFloat(value)
     }));
-
+    
     // Automatically apply the filter when parameters change
     if (uploadedFilename) {
       if (selectedFilter === 'original') {
@@ -194,121 +194,18 @@ const ImageEditor = () => {
     return icons[category] || 'fas fa-image';
   };
 
-  // Define Persian translations for filters
-  const getFilterNameInPersian = (filterName) => {
-    const persianNames = {
-      'original': 'تصویر اصلی',
-      'grayscale': 'سیاه و سفید',
-      'sepia': 'سپیا',
-      'negative': 'نگاتیو',
-      'brightness': 'روشنایی',
-      'contrast': 'کنتراست',
-      'warm': 'گرم',
-      'cool': 'سرد',
-      'vintage': 'وینتیج',
-      'cyberpunk': 'سایبرپانک',
-      'sunset': 'غروب',
-      'night': 'شب',
-      'autumn': 'پاییز',
-      'spring': 'بهار',
-      'purple_haze': 'مه بنفش',
-      'golden_hour': 'ساعت طلایی',
-      'neon': 'نئون',
-      'pastel': 'پاستل',
-      'duotone': 'دو رنگ',
-      'tritone': 'سه رنگ',
-      'hue_shift': 'تغییر رنگ',
-      'saturation': 'اشباع رنگ',
-      'vibrance': 'جذابیت رنگ',
-      'color_balance': 'تعادل رنگ',
-      'bw_high_contrast': 'سیاه سفید کنتراست بالا',
-      'bw_low_contrast': 'سیاه سفید کنتراست پایین',
-      'bw_red_filter': 'سیاه سفید فیلتر قرمز',
-      'bw_green_filter': 'سیاه سفید فیلتر سبز',
-      'bw_blue_filter': 'سیاه سفید فیلتر آبی',
-      'bw_orange_filter': 'سیاه سفید فیلتر نارنجی',
-      'bw_yellow_filter': 'سیاه سفید فیلتر زرد',
-      'ansel_adams': 'سبک انسل آدامز',
-      'film_noir': 'فیلم نوآر',
-      'infrared': 'مادون قرمز',
-      'gaussian_blur': 'محو گاوسی',
-      'motion_blur': 'محو حرکتی',
-      'box_blur': 'محو جعبه‌ای',
-      'radial_blur': 'محو شعاعی',
-      'zoom_blur': 'محو زوم',
-      'tilt_shift': 'تیلت شیفت',
-      'lens_blur': 'محو لنز',
-      'surface_blur': 'محو سطحی',
-      'sobel': 'تشخیص لبه سوبل',
-      'canny': 'تشخیص لبه کنی',
-      'laplacian': 'تشخیص لبه لاپلاسین',
-      'prewitt': 'تشخیص لبه پرویت',
-      'roberts': 'تشخیص لبه رابرتس',
-      'emboss': 'برجسته',
-      'oil_painting': 'نقاشی رنگ روغن',
-      'pencil_sketch': 'طراحی با مداد',
-      'colored_pencil': 'مداد رنگی',
-      'cartoon': 'کارتونی',
-      'watercolor': 'آبرنگ',
-      'pointillism': 'نقطه‌چینی',
-      'impressionist': 'امپرسیونیست',
-      'pop_art': 'پاپ آرت',
-      'comic_book': 'کتاب کمیک',
-      'mosaic': 'موزاییک',
-      'stained_glass': 'شیشه رنگی',
-      'vintage_film': 'فیلم قدیمی',
-      'kodachrome': 'کداکروم',
-      'polaroid': 'پولاروید',
-      'lomo': 'لومو',
-      'cross_process': 'کراس پروسس',
-      'faded_film': 'فیلم رنگ پریده',
-      'old_photo': 'عکس قدیمی',
-      'daguerreotype': 'داگرئوتایپ',
-      'hdr': 'HDR',
-      'glamour': 'گلامور',
-      'dramatic': 'دراماتیک',
-      'dreamy': 'رویایی',
-      'ethereal': 'اثیری',
-      'grunge': 'گرانج',
-      'rainbow': 'رنگین کمان',
-      'thermal': 'حرارتی',
-      'xray': 'اشعه ایکس',
-      'matrix': 'ماتریکس',
-      'sharpen': 'تیز کردن',
-      'denoise': 'حذف نویز',
-      'histogram_eq': 'بهبود کنتراست',
-      'clahe': 'CLAHE',
-      'unsharp_mask': 'Unsharp Mask',
-      'edge_preserve': 'صاف با حفظ لبه',
-      'fisheye': 'چشم ماهی',
-      'barrel_distortion': 'دیستورشن بشکه‌ای',
-      'pincushion': 'دیستورشن بالشتکی',
-      'wave': 'موج',
-      'swirl': 'چرخش',
-      'pixelate': 'پیکسلی',
-      'crystallize': 'کریستالی',
-      'vignette': 'وینیت',
-      'light_leak': 'نشت نور',
-      'lens_flare': 'فلر لنز',
-      'sun_rays': 'پرتوهای خورشید',
-      'soft_light': 'نور نرم',
-      'hard_light': 'نور سخت'
-    };
-    return persianNames[filterName] || filterName;
-  };
-
   return (
-    <div className="min-h-screen">
-      {/* Upload Section */}
+    <div className="min-h-screen bg-dark-bg text-white pb-20">
+      {/* Upload Section - only shown when no image is loaded */}
       {!originalImage && (
         <motion.div
-          className="flex flex-col items-center justify-center min-h-96"
+          className="flex flex-col items-center justify-center min-h-screen py-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
           <div 
-            className="border-2 border-dashed border-accent-primary rounded-2xl p-12 text-center cursor-pointer hover:bg-dark-card transition-colors w-full max-w-md"
+            className="border-2 border-dashed border-accent-primary rounded-2xl p-12 text-center cursor-pointer hover:bg-dark-card transition-colors w-full max-w-2xl mx-auto"
             onClick={() => fileInputRef.current?.click()}
           >
             <FaUpload className="text-accent-primary text-6xl mx-auto mb-6" />
@@ -326,59 +223,99 @@ const ImageEditor = () => {
         </motion.div>
       )}
 
-      {/* Main Editor */}
+      {/* Main Editor - only shown when image is loaded */}
       {originalImage && (
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Fixed Image Display Panel */}
-          <div className="lg:w-1/2 sticky top-4 self-start">
-            <div className="grid md:grid-cols-1 gap-8">
-              <div className="card glass-effect overflow-hidden">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    <FaFolderOpen className="mr-2 text-accent-primary" /> Original Image
-                  </h3>
-                  <span className="text-sm text-gray-400">{fileName}</span>
+        <div className="container mx-auto px-4 py-8">
+          {/* Sticky Controls Section */}
+          <div className="sticky top-4 z-50 mb-8">
+            <div className="card glass-effect p-4">
+              <div className="flex flex-wrap gap-3 justify-between items-center">
+                <div className="flex gap-3">
+                  <button
+                    onClick={applyFilter}
+                    disabled={isLoading}
+                    className="btn-primary flex items-center"
+                  >
+                    {isLoading ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <FaMagic className="mr-2" />
+                    )}
+                    Apply Filter
+                  </button>
+                  
+                  <button
+                    onClick={downloadImage}
+                    className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-accent-primary text-accent-primary hover:bg-accent-primary hover:text-dark-bg flex items-center"
+                  >
+                    <FaDownload className="mr-2" /> Download
+                  </button>
+                  
+                  <button
+                    onClick={resetImage}
+                    className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-gray-500 text-gray-300 hover:bg-gray-500 hover:text-dark-bg flex items-center"
+                  >
+                    <FaRedo className="mr-2" /> Reset
+                  </button>
                 </div>
-                <div className="aspect-square flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
-                  <img 
-                    src={originalImage} 
-                    alt="Original" 
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
-              </div>
-
-              <div className="card glass-effect overflow-hidden">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    <FaMagic className="mr-2 text-accent-primary" /> Filtered Image
-                  </h3>
-                  <span className="text-sm text-gray-400 capitalize">{selectedFilter.replace(/_/g, ' ')}</span>
-                </div>
-                <div className="aspect-square flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
-                  {(filteredImage && selectedFilter !== 'original') ? (
-                    <img
-                      src={filteredImage}
-                      alt="Filtered"
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  ) : originalImage ? (
-                    <img
-                      src={originalImage}
-                      alt="Original (no filter applied)"
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  ) : (
-                    <div className="text-gray-500">Apply a filter to see the result</div>
-                  )}
+                
+                <div className="text-sm text-gray-400">
+                  Current Filter: <span className="capitalize font-medium">{selectedFilter.replace(/_/g, ' ')}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Scrollable Filters Section */}
-          <div className="lg:w-1/2">
-            <div className="card glass-effect mb-8">
+          {/* Image Display Section - Large images */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Original Image Card - Large display */}
+            <div className="card glass-effect overflow-hidden">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <FaFolderOpen className="mr-2 text-accent-primary" /> Original Image
+                </h3>
+                <span className="text-sm text-gray-400 truncate max-w-[120px]">{fileName}</span>
+              </div>
+              <div className="flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
+                <img 
+                  src={originalImage} 
+                  alt="Original" 
+                  className="max-w-full max-h-[70vh] object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Filtered Image Card - Large display */}
+            <div className="card glass-effect overflow-hidden">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <FaMagic className="mr-2 text-accent-primary" /> Filtered Image
+                </h3>
+                <span className="text-sm text-gray-400 capitalize">{selectedFilter.replace(/_/g, ' ')}</span>
+              </div>
+              <div className="flex items-center justify-center bg-dark-card rounded-lg overflow-hidden">
+                {(filteredImage && selectedFilter !== 'original') ? (
+                  <img 
+                    src={filteredImage} 
+                    alt="Filtered" 
+                    className="max-w-full max-h-[70vh] object-contain"
+                  />
+                ) : originalImage ? (
+                  <img 
+                    src={originalImage} 
+                    alt="Original (no filter applied)" 
+                    className="max-w-full max-h-[70vh] object-contain"
+                  />
+                ) : (
+                  <div className="text-gray-500 p-8">Apply a filter to see the result</div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Sticky Filter Panel */}
+          <div className="sticky top-[100px] z-40">
+            <div className="card glass-effect">
               <h3 className="text-xl font-semibold mb-6 flex items-center">
                 <FaMagic className="mr-2 text-accent-primary" /> Select Filter
               </h3>
@@ -442,7 +379,7 @@ const ImageEditor = () => {
                   <h4 className="text-lg font-semibold mb-4 flex items-center">
                     <FaSlidersH className="mr-2 text-accent-primary" /> Parameters
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filters.find(f => f.id === selectedFilter)?.params?.map((param) => (
                       <div key={param.name} className="space-y-2">
                         <label className="block text-sm font-medium">
@@ -496,36 +433,6 @@ const ImageEditor = () => {
                   </div>
                 </div>
               )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={applyFilter}
-                  disabled={isLoading}
-                  className="btn-primary flex items-center"
-                >
-                  {isLoading ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  ) : (
-                    <FaMagic className="mr-2" />
-                  )}
-                  Apply Filter
-                </button>
-                
-                <button
-                  onClick={downloadImage}
-                  className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-accent-primary text-accent-primary hover:bg-accent-primary hover:text-dark-bg flex items-center"
-                >
-                  <FaDownload className="mr-2" /> Download
-                </button>
-                
-                <button
-                  onClick={resetImage}
-                  className="px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2 border-gray-500 text-gray-300 hover:bg-gray-500 hover:text-dark-bg flex items-center"
-                >
-                  <FaRedo className="mr-2" /> Reset
-                </button>
-              </div>
             </div>
           </div>
         </div>
