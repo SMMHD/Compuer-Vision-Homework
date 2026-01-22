@@ -30,7 +30,7 @@ instance/
 .flaskenv
 
 # Virtual environment
-venv/
+.venv/
 env/
 ENV/
 env.bak/
@@ -91,3 +91,7 @@ Thumbs.db
 *.PDSPRJ
 *.bak
 *.tmp
+
+
+node_modules/
+frontend-react/node_modules/
